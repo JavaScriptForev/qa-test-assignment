@@ -1,39 +1,33 @@
 import { Page, Locator } from '@playwright/test';
+import { BasePage } from './base.page';
 
-export class ForgotPasswordPage {
-    readonly page: Page;
+export class ForgotPasswordPage extends BasePage {
     readonly emailInput: Locator;
-    readonly retrieveButton: Locator;
+    readonly submitButton: Locator;
     readonly flashMessage: Locator;
-    readonly invalidFeedback: Locator;
 
     constructor(page: Page) {
-        this.page = page;
+        super(page);
         this.emailInput = page.locator('#email');
-        this.retrieveButton = page.locator('button[type="submit"]');
-        this.flashMessage = page.locator('#flash');
-        this.invalidFeedback = page.locator('.invalid-feedback');
+        this.submitButton = page.getByRole('button', { name: 'Retrieve password' });
+        this.flashMessage = page.locator('#confirmation-alert');
     }
 
     async goto() {
-        await this.page.goto('https://practice.expandtesting.com/forgot-password', {
-            waitUntil: 'domcontentloaded'
-        });
-        await this.emailInput.waitFor({ state: 'visible', timeout: 10000 });
+        await super.goto('https://practice.expandtesting.com/forgot-password');
+        await this.waitForElement(this.emailInput);
     }
 
     async submitEmail(email: string) {
-        await this.emailInput.fill(email);
-        await this.retrieveButton.click();
+        await this.fill(this.emailInput, email);
+        await this.click(this.submitButton);
     }
 
     async getFlashMessage(): Promise<string> {
-        await this.flashMessage.waitFor({ state: 'visible', timeout: 5000 });
-        return (await this.flashMessage.textContent()) || '';
+        return await this.getText(this.flashMessage);
     }
 
-    async getInvalidFeedback(): Promise<string> {
-        await this.invalidFeedback.waitFor({ state: 'visible', timeout: 5000 });
-        return (await this.invalidFeedback.textContent()) || '';
+    async waitForFlashMessage() {
+        await this.waitForElement(this.flashMessage, 5000);
     }
 }

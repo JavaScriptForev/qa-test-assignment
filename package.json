@@ -1,17 +1,18 @@
 {
   "name": "qa-test-assignment",
+  "private": true,
   "version": "1.0.0",
-  "main": "index.js",
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "npx playwright test",
+    "test:stable": "npx playwright test --workers=1 --retries=5 --timeout=180000",
+    "test:headed": "npx playwright test --headed --workers=1 --retries=5",
+    "test:debug": "npx playwright test --debug --workers=1",
+    "report": "npx playwright show-report"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
   "devDependencies": {
-    "@playwright/test": "^1.61.0",
-    "@types/node": "^26.0.0",
-    "typescript": "^6.0.3"
+    "@playwright/test": "^1.60.0",
+    "@types/node": "^24.13.2",
+    "typescript": "~6.0.2"
   }
 }

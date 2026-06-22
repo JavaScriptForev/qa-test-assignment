@@ -1,39 +1,34 @@
 import { Page, Locator } from '@playwright/test';
+import { BasePage } from './base.page';
 
-export class AutocompletePage {
-    readonly page: Page;
+export class AutocompletePage extends BasePage {
     readonly searchInput: Locator;
-    readonly submitButton: Locator;
-    readonly resultBlock: Locator;
+    readonly suggestionsList: Locator;
 
     constructor(page: Page) {
-        this.page = page;
+        super(page);
         this.searchInput = page.locator('#country');
-        this.submitButton = page.locator('button:has-text("Submit")');
-        this.resultBlock = page.locator('#result');
+        this.suggestionsList = page.locator('#countryautocomplete-list');
     }
 
     async goto() {
-        await this.page.goto('https://practice.expandtesting.com/autocomplete', {
-            waitUntil: 'domcontentloaded'
+        await super.goto('https://practice.expandtesting.com/autocomplete');
+        await this.waitForElement(this.searchInput);
+    }
+
+    async searchForCountry(query: string) {
+        await this.fill(this.searchInput, query);
+        await this.waitForElement(this.suggestionsList);
+    }
+
+    async selectCountry(country: string) {
+        const option = this.suggestionsList.locator('div', {
+            has: this.page.locator(`input[value='${country}']`),
         });
-        await this.searchInput.waitFor({ state: 'visible', timeout: 10000 });
+        await this.click(option);
     }
 
-    async searchCountry(country: string) {
-        await this.searchInput.fill(country);
-        // Ждём появления предложений в автокомплите
-        await this.page.waitForTimeout(1500);
-    }
-
-    async selectSuggestionByText(text: string) {
-        // Ищем любой элемент, содержащий текст, и кликаем по нему
-        const suggestion = this.page.locator(`text=${text}`).first();
-        await suggestion.waitFor({ state: 'visible', timeout: 5000 });
-        await suggestion.click();
-    }
-
-    async getInputValue(): Promise<string> {
-        return await this.searchInput.inputValue();
+    async getSelectedValue(): Promise<string> {
+        return await this.getInputValue(this.searchInput);
     }
 }

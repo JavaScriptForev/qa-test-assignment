@@ -1,48 +1,31 @@
 import { Page } from '@playwright/test';
 
-/**
- * Генерирует случайную строку для тестов
- */
-export function generateRandomString(length: number = 8): string {
-    const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    let result = '';
-    for (let i = 0; i < length; i++) {
-        result += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return result;
-}
+export async function safeGoto(
+    page: Page,
+    url: string,
+    maxRetries: number = 5
+): Promise<void> {
+    let lastError: Error | null = null;
 
-/**
- * Ожидает загрузки страницы и проверяет URL
- */
-export async function waitForPageLoad(page: Page, expectedUrl?: string) {
-    await page.waitForLoadState('networkidle');
-    if (expectedUrl) {
-        await page.waitForURL(new RegExp(expectedUrl));
-    }
-}
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+            await page.goto(url, {
+                waitUntil: 'domcontentloaded',
+                timeout: 60000,
+            });
+            console.log(`✅ Успешно загружено: ${url} (попытка ${attempt})`);
+            return;
+        } catch (error) {
+            lastError = error as Error;
+            const waitTime = attempt * 3000;
+            console.log(`⚠️ Попытка ${attempt}/${maxRetries} не удалась: ${error}`);
+            console.log(`⏳ Ждём ${waitTime/1000} секунд перед следующей попыткой...`);
 
-/**
- * Проверяет, что элемент видим и активен
- */
-export async function isElementReady(page: Page, selector: string): Promise<boolean> {
-    try {
-        const element = page.locator(selector);
-        await element.waitFor({ state: 'visible', timeout: 5000 });
-        return await element.isEnabled();
-    } catch {
-        return false;
-    }
-}
-
-/**
- * Очищает все поля формы
- */
-export async function clearFormFields(page: Page, selectors: string[]) {
-    for (const selector of selectors) {
-        const field = page.locator(selector);
-        if (await field.isVisible()) {
-            await field.clear();
+            if (attempt < maxRetries) {
+                await page.waitForTimeout(waitTime);
+            }
         }
     }
+
+    throw new Error(`❌ Не удалось загрузить ${url} после ${maxRetries} попыток: ${lastError}`);
 }

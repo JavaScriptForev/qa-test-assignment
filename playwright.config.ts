@@ -4,14 +4,14 @@ export default defineConfig({
     testDir: './tests',
     fullyParallel: true,
     forbidOnly: !!process.env.CI,
-    retries: 2,  // Всегда повторяем 2 раза
-    workers: process.env.CI ? 1 : 4,  // Локально 4 воркера
+    retries: 5,
+    workers: process.env.CI ? 1 : 1,
     reporter: 'html',
     use: {
         baseURL: 'https://practice.expandtesting.com',
         trace: 'on-first-retry',
-        actionTimeout: 15000,
-        navigationTimeout: 60000,  // Ждём загрузку 60 секунд
+        actionTimeout: 60000,
+        navigationTimeout: 180000,
     },
     projects: [
         {

@@ -1,41 +1,43 @@
 import { Page, Locator } from '@playwright/test';
+import { BasePage } from './base.page';
 
-export class CheckboxesPage {
-    readonly page: Page;
+export class CheckboxesPage extends BasePage {
     readonly checkbox1: Locator;
     readonly checkbox2: Locator;
 
     constructor(page: Page) {
-        this.page = page;
+        super(page);
         this.checkbox1 = page.locator('#checkbox1');
         this.checkbox2 = page.locator('#checkbox2');
     }
 
     async goto() {
-        await this.page.goto('https://practice.expandtesting.com/checkboxes', {
-            waitUntil: 'domcontentloaded'
-        });
-        await this.checkbox1.waitFor({ state: 'visible', timeout: 10000 });
+        await super.goto('https://practice.expandtesting.com/checkboxes');
+        await this.waitForElement(this.checkbox1);
     }
 
-    async checkCheckbox(checkbox: Locator) {
-        if (!await checkbox.isChecked()) {
-            await checkbox.check();
+    async toggleCheckbox1() {
+        await this.click(this.checkbox1);
+    }
+
+    async toggleCheckbox2() {
+        await this.click(this.checkbox2);
+    }
+
+    async isCheckbox1Checked(): Promise<boolean> {
+        return await this.checkbox1.isChecked();
+    }
+
+    async isCheckbox2Checked(): Promise<boolean> {
+        return await this.checkbox2.isChecked();
+    }
+
+    async resetCheckboxes() {
+        if (await this.isCheckbox1Checked()) {
+            await this.toggleCheckbox1();
         }
-    }
-
-    async uncheckCheckbox(checkbox: Locator) {
-        if (await checkbox.isChecked()) {
-            await checkbox.uncheck();
+        if (await this.isCheckbox2Checked()) {
+            await this.toggleCheckbox2();
         }
-    }
-
-    async isCheckboxChecked(checkbox: Locator): Promise<boolean> {
-        return await checkbox.isChecked();
-    }
-
-    async reloadPage() {
-        await this.page.reload({ waitUntil: 'domcontentloaded' });
-        await this.checkbox1.waitFor({ state: 'visible', timeout: 10000 });
     }
 }
