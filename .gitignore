@@ -1,0 +1,46 @@
+# Зависимости
+node_modules/
+package-lock.json
+yarn.lock
+
+# Результаты тестов
+test-results/
+test-results-*
+playwright-report/
+playwright-report-*
+test-report/
+coverage/
+
+# Логи и кэш
+*.log
+.cache/
+.temp/
+
+# Системные файлы
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.iml
+
+# Env файлы
+.env
+.env.local
+.env.*.local
+
+# Временные файлы
+dist/
+build/
+*.tmp
+*.temp
+
+# Отчёты Allure
+allure-results/
+allure-report/
+
+# Общие артефакты
+*.zip
+*.tar
+*.tar.gz
